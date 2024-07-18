@@ -118,7 +118,7 @@ class MD3Exporter:
 
     def pack_surface_shader(self, i):
         return fmt.Shader.pack(
-            name=prepare_name(self.mesh_shader_list[i]),
+            name=prepare_name(self.mesh_shader_list[i].name),
             index=i,
         )
 
@@ -140,7 +140,7 @@ class MD3Exporter:
             a, b, t = self.mesh_sk_abs
             co = interp(kbs[a].data[i].co, kbs[b].data[i].co, t)
 
-        co = self.mesh_matrix * co
+        co = self.mesh_matrix @ co
         self.mesh_vco[frame].append(co)
         return co
 
@@ -164,8 +164,7 @@ class MD3Exporter:
 
     def surface_start_frame(self, i):
         self.switch_frame(i)
-
-        obj = self.scene.objects.active
+        obj = bpy.context.view_layer.objects.active
         self.mesh_matrix = obj.matrix_world
         self.mesh = obj.to_mesh(self.scene, True, 'PREVIEW')
         self.mesh.calc_normals_split()
@@ -190,10 +189,10 @@ class MD3Exporter:
 
     def pack_surface(self, surf_name):
         obj = self.scene.objects[surf_name]
-        self.scene.objects.active = obj
+        bpy.context.view_layer.objects.active = obj
         bpy.ops.object.modifier_add(type='TRIANGULATE')  # no 4-gons or n-gons
-        self.mesh = obj.to_mesh(self.scene, True, 'PREVIEW')
-        self.mesh.calc_normals_split()
+        dg = bpy.context.evaluated_depsgraph_get()
+        self.mesh = obj.to_mesh(preserve_all_data_layers=True, depsgraph=dg)
 
         self.mesh_uvmap_name, self.mesh_shader_list = gather_shader_info(self.mesh)
         self.mesh_md3vert_to_loop, self.mesh_loop_to_md3vert = gather_vertices(
@@ -215,12 +214,9 @@ class MD3Exporter:
         f.write(b''.join([self.pack_surface_ST(i) for i in range(nVerts)]))
         f.mark('offVerts')
 
-        self.mesh.free_normals_split()
-
         for frame in range(self.nFrames):
             self.surface_start_frame(frame)
             f.write(b''.join([self.pack_surface_vert(frame, i) for i in range(nVerts)]))
-            self.mesh.free_normals_split()
 
         f.mark('offEnd')
 
@@ -287,7 +283,7 @@ class MD3Exporter:
                 continue
             if o.type == 'MESH':
                 self.surfNames.append(o.name)
-            elif o.type == 'EMPTY' and o.empty_draw_type == 'ARROWS':
+            elif o.type == 'EMPTY' and o.empty_display_type == 'ARROWS':
                 self.tagNames.append(o.name)
         self.mesh_vco = defaultdict(list)
 
