@@ -21,34 +21,36 @@ def prepare_name(name):
         return name[:-4]  # cut off blender's .001 .002 etc
     return name
 
+def get_textures(material):
+    textures = []
+    if material.node_tree:
+        for tex in material.node_tree.nodes:
+            if tex.type=='TEX_IMAGE':
+                textures.append(tex)
+    return textures
 
 def gather_shader_info(mesh):
     'Returning uvmap name, texture name list'
-    uv_maps = {}
+    uv_maps = mesh.uv_layers
+
     for material in mesh.materials:
-        for texture_slot in material.texture_slots:
+        textures = get_textures(material)
+        
+        for texture_slot in textures:
             if (
                 texture_slot is None
-                or not texture_slot.use
-                or not texture_slot.uv_layer
-                or texture_slot.texture_coords != 'UV' or not texture_slot.texture
-                or texture_slot.texture.type != 'IMAGE'
             ):
                 continue
-            uv_map_name = texture_slot.uv_layer
-            if uv_map_name not in uv_maps:
-                uv_maps[uv_map_name] = []
+
             # one UV map can be used by many textures
-            uv_maps[uv_map_name].append(prepare_name(texture_slot.texture.name))
-    uv_maps = [(k, v) for k, v in uv_maps.items()]
     if len(uv_maps) <= 0:
         print('Warning: No UV maps found, zero filling will be used')
         return None, []
     elif len(uv_maps) == 1:
-        return uv_maps[0]
+        return uv_maps.active.name, [uv_maps.active]
     else:
         print('Warning: Multiple UV maps found, only one will be chosen')
-        return uv_maps[0]
+        return uv_maps.active.name, [uv_maps.active]
 
 
 def gather_vertices(mesh, uvmap_data=None):
