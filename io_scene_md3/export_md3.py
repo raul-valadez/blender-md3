@@ -282,8 +282,8 @@ class MD3Exporter:
         self.nFrames = self.scene.frame_end - self.scene.frame_start + 1
         self.surfNames = []
         self.tagNames = []
-        for o in self.scene.objects:
-            if o.hide:  # skip hidden objects
+        for o in bpy.context.selected_objects:
+            if o.hide_get():  # skip hidden objects
                 continue
             if o.type == 'MESH':
                 self.surfNames.append(o.name)
