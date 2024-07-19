@@ -168,8 +168,10 @@ class MD3Exporter:
         self.switch_frame(i)
         obj = bpy.context.view_layer.objects.active
         self.mesh_matrix = obj.matrix_world
-        self.mesh = obj.to_mesh(self.scene, True, 'PREVIEW')
-        self.mesh.calc_normals_split()
+        obj.update_from_editmode()
+        dg = bpy.context.evaluated_depsgraph_get()
+        ob_eval = obj.evaluated_get(dg)
+        self.mesh = ob_eval.to_mesh()
 
         self.mesh_sk_rel = None
         self.mesh_sk_abs = None
