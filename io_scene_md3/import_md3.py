@@ -124,12 +124,9 @@ class MD3Importer:
     def read_surface_shader(self, i):
         data = self.unpack(fmt.Shader)
 
-        texture = bpy.data.textures.new(data.name, 'IMAGE')
-        texture_slot = self.material.texture_slots.create(i)
-        texture_slot.uv_layer = 'UVMap'
-        texture_slot.use = True
-        texture_slot.texture_coords = 'UV'
-        texture_slot.texture = texture
+        shader = self.material.node_tree.nodes["Principled BSDF"]
+        texture = self.material.node_tree.nodes.new('ShaderNodeTexImage')
+        self.material.node_tree.links.new(shader.inputs['Base Color'], texture.outputs['Color'])
 
         for fname in guess_texture_filepath(self.filename, data.name):
             if '\0' in fname:  # preventing ValueError: embedded null byte
