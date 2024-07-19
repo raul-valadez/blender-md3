@@ -81,7 +81,7 @@ class MD3Importer:
         self.mesh.loops[ls + 1].vertex_index = data.c  # swapped
         self.mesh.loops[ls + 2].vertex_index = data.b  # swapped
         self.mesh.polygons[i].loop_start = ls
-        self.mesh.polygons[i].loop_total = 3
+        #self.mesh.polygons[i].loop_total = 3
         self.mesh.polygons[i].use_smooth = True
 
     def read_surface_vert(self, i):
@@ -104,7 +104,7 @@ class MD3Importer:
                 data.nVerts,
                 start_pos + data.offVerts + frame * fmt.Vertex.size * data.nVerts,
                 self.read_surface_vert)
-        self.scene.objects.active = obj
+        bpy.context.view_layer.objects.active = obj
         self.context.object.active_shape_key_index = 0
         bpy.ops.object.shape_key_retime()
         for frame in range(data.nFrames):
@@ -161,12 +161,12 @@ class MD3Importer:
         self.read_n_items(data.nVerts, start_pos + data.offVerts, self.read_surface_vert)
 
         self.mesh.validate()
-        self.mesh.calc_normals()
 
         self.material = bpy.data.materials.new('Main')
+        self.material.use_nodes = True
         self.mesh.materials.append(self.material)
 
-        self.mesh.uv_textures.new('UVMap')
+        self.mesh.uv_layers.new(name='UVMap')
         self.make_surface_UV_map(
             self.read_n_items(data.nVerts, start_pos + data.offST, self.read_surface_ST),
             self.mesh.uv_layers['UVMap'].data)
@@ -174,7 +174,7 @@ class MD3Importer:
         self.read_n_items(data.nShaders, start_pos + data.offShaders, self.read_surface_shader)
 
         obj = bpy.data.objects.new(data.name, self.mesh)
-        self.scene.objects.link(obj)
+        self.scene.collection.objects.link(obj)
 
         if data.nFrames > 1:
             self.read_mesh_animation(obj, data, start_pos)
