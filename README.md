@@ -9,6 +9,4 @@ Used [this](http://www.icculus.org/homepages/phaethon/q3a/formats/md3format.html
 
 ## Supported versions
 
-4.1 and up. This addon will probably not work with versions before 4.0 
-API changed in how vertex normals are calculated. This broke backwards compatibility...
-If I'm wrong let me know, maybe we can fix it!
+Blender 4.2.2 LTS, still testing!
