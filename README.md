@@ -9,4 +9,4 @@ Used [this](http://www.icculus.org/homepages/phaethon/q3a/formats/md3format.html
 
 ## Supported versions
 
-Blender 4.2.2 LTS, still testing!
+Blender 4.2.2 LTS, Working but still testing - for bugs!
