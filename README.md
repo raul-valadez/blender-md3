@@ -1,7 +1,7 @@
 # .MD3 support for Blender
 
 Updated version of [blender-md3](https://github.com/neumond/blender-md3) addon for working with Quake 3 model format (md3).
-Now works with Blender ≥ 4.1.0
+Now works with Blender ≥ 4.2.2
 
 Can work with animations in any form (no need to bake to Shape Keys), textures and md3 tags (added as Empty objects).
 
